@@ -1,11 +1,26 @@
 import os
 import cv2
 import sqlite3
-from flask import Flask, render_template, request, url_for
+from flask import Flask, render_template, request
 from datetime import datetime
+from flask_mail import Mail, Message
+from dotenv import load_dotenv
 
-# إنشاء تطبيق Flask وتحديد مجلد الملفات الثابتة
+# تحميل بيانات .env
+load_dotenv()
+
+# إعدادات التطبيق
 app = Flask(__name__, static_folder='static')
+
+# إعدادات البريد الإلكتروني باستخدام Flask-Mail
+app.config['MAIL_SERVER'] = 'smtp.zoho.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')  # تحميل بيانات البريد من .env
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')  # تحميل بيانات البريد من .env
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')  # تعيين الإيميل كـ مرسل افتراضي
+mail = Mail(app)
 
 # مسار المجلد لحفظ الصور
 IMAGE_FOLDER = "static/images"
@@ -27,6 +42,19 @@ def create_database():
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS student_interactions (
+            interaction_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER,
+            activity_type TEXT,
+            interaction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            interaction_type TEXT,
+            score INTEGER,
+            FOREIGN KEY (student_id) REFERENCES attendance (id)
+        )
+    ''')
+
     conn.commit()
     conn.close()
 
@@ -70,11 +98,22 @@ def attendance():
             conn.commit()
             conn.close()
 
+            # إرسال إشعار عبر البريد الإلكتروني (اختياري)
+            send_email_notification(student_name, image_path)
+
             return render_template('attendance.html', image_path=image_path, student_name=student_name)
         else:
             return "Error: Could not capture image."
 
     return render_template('attendance_form.html')
+
+# إرسال إشعار بالبريد الإلكتروني
+def send_email_notification(student_name, image_path):
+    msg = Message(f"Attendance Recorded for {student_name}",
+                  sender=os.getenv('MAIL_USERNAME'),  # المرسل
+                  recipients=['mga.4004497@gmail.com'])  # المستلم (ولي الأمر أو المعلم)
+    msg.body = f"Attendance has been recorded for {student_name}. You can view the image at: {image_path}"
+    mail.send(msg)
 
 @app.route('/attendance-list')
 def attendance_list():
@@ -86,10 +125,33 @@ def attendance_list():
 
     return render_template('attendance_list.html', records=records)
 
+# إنشاء تقرير المعلم
+@app.route('/teacher-report')
+def teacher_report():
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+
+    # استعلام SQL للحصول على تقرير الأداء للطلاب
+    cursor.execute('''
+        SELECT student_name, 
+               COUNT(interaction_id) AS num_activities, 
+               AVG(score) AS avg_score, 
+               GROUP_CONCAT(DISTINCT activity_type) AS activity_types
+        FROM student_interactions
+        JOIN attendance ON attendance.id = student_interactions.student_id
+        GROUP BY student_name
+    ''')
+
+    # جلب البيانات من الاستعلام
+    report = cursor.fetchall()
+    conn.close()
+
+    # عرض التقرير في صفحة المعلم
+    return render_template('teacher_report.html', report=report)
+
 if __name__ == "__main__":
     import os
 
-if __name__ == "__main__":
     if os.name == "nt":  # Windows
         from waitress import serve
         print("Running with Waitress on Windows...")
@@ -98,4 +160,3 @@ if __name__ == "__main__":
         print("Running with Gunicorn on Linux...")
         from gunicorn.app.wsgiapp import run
         run()
-

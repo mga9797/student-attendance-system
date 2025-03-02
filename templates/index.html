@@ -3,16 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Attendance</title>
+    <title>Student Attendance System</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="container">
         <h1>Welcome to Student Attendance System</h1>
-        <p>Click the button below to start the attendance process.</p>
+        <p>Choose an option below to proceed:</p>
         <div class="buttons">
+            <!-- رابط للصفحة الخاصة بالحضور -->
             <a href="/attendance" class="btn">Go to Attendance</a>
+
+            <!-- رابط لعرض سجلات الحضور -->
             <a href="/attendance-list" class="btn">View Attendance Records</a>
+
+            <!-- رابط لصفحة تقرير المعلم -->
+            <a href="/teacher-report" class="btn">Teacher Report</a>
         </div>
     </div>
 </body>

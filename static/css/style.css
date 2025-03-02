@@ -13,14 +13,16 @@ body {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    max-width: 600px;
+    max-width: 800px;   /* زيادة الحجم ليكون مناسبًا */
     margin: auto;
 }
 
 /* تنسيق العنوان */
 h1 {
     color: #333;
-    font-size: 24px;
+    font-size: 30px;    /* تكبير الحجم لتسليط الضوء */
+    font-weight: bold;  /* جعل العنوان غامقًا */
+    margin-bottom: 30px;  /* إضافة مسافة أسفل العنوان */
 }
 
 /* تنسيق النصوص */
@@ -31,19 +33,23 @@ p {
 
 /* تنسيق الأزرار */
 .buttons {
-    margin-top: 20px;
+    display: flex;                  /* استخدام Flexbox لعرض الأزرار أفقيًا */
+    justify-content: center;         /* محاذاة الأزرار في المنتصف */
+    gap: 20px;                       /* المسافة بين الأزرار */
+    margin-top: 30px;
 }
 
 .btn {
     display: inline-block;
-    padding: 12px 20px;
+    padding: 15px 30px;              /* تحسين حجم الأزرار */
     margin: 10px;
     background-color: #007bff;
     color: white;
     text-decoration: none;
-    font-size: 16px;
-    border-radius: 5px;
+    font-size: 18px;
+    border-radius: 10px;
     transition: 0.3s;
+    text-align: center;
 }
 
 .btn:hover {
@@ -102,5 +108,115 @@ button {
 }
 
 button:hover {
+    background-color: #218838;
+}
+
+/* تنسيق الصفحة الرئيسية (index.html) */
+h1 {
+    font-size: 28px;
+    color: #007bff;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.buttons .btn {
+    width: 200px;
+    margin: 10px;
+    padding: 15px;
+    font-size: 18px;
+    text-align: center;
+    background-color: #007bff;
+    border-radius: 10px;
+    transition: 0.3s;
+}
+
+.buttons .btn:hover {
+    background-color: #0056b3;
+}
+
+/* التنسيق العام للأزرار في الصفحة الرئيسية */
+.buttons {
+    margin-top: 30px;
+}
+
+/* تحسين تصميم الرسم البياني في صفحة التقرير */
+.chart-container {
+    width: 250px;  /* جعل الرسم البياني أصغر */
+    height: 250px;
+    float: right;  /* وضع الرسم البياني على الجهة اليمنى */
+    margin-top: -30px; /* تقليل المسافة العليا */
+}
+
+/* تحسين زر الرجوع في صفحة التقرير */
+.back-button {
+    margin-top: 20px;
+    text-align: left;
+}
+
+.back-button .btn {
+    background-color: #ff5733;
+}
+
+.back-button .btn:hover {
+    background-color: #c0392b;
+}
+
+/* تحسين شكل الجدول في صفحة التقرير */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px auto;
+    background: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+th {
+    background-color: #007bff;
+    color: white;
+}
+
+/* زر تعديل وحذف الطلاب */
+.btn-edit {
+    background-color: #ffc107;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-edit:hover {
+    background-color: #e0a800;
+}
+
+.btn-remove {
+    background-color: #dc3545;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-remove:hover {
+    background-color: #c82333;
+}
+
+.btn-save {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-save:hover {
     background-color: #218838;
 }

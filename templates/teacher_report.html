@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Report</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Teacher Report</h1>
+
+        <!-- قسم الفلاتر وإضافة الطلاب -->
+        <div class="filters">
+            <label for="student">Add Student:</label>
+            <input type="text" id="studentName" placeholder="Enter Student Name">
+            <button onclick="addStudent()" class="btn">Save</button>
+        </div>
+
+        <!-- جدول تقرير الأداء -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Number of Activities</th>
+                    <th>Average Score</th>
+                    <th>Activity Types</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="studentTable">
+                <!-- البيانات القادمة من قاعدة البيانات -->
+                {% for row in report %}
+                <tr id="row-{{ loop.index }}">
+                    <td><input type="text" value="{{ row[0] }}" id="studentName-{{ loop.index }}" /></td>  <!-- اسم الطالب -->
+                    <td><input type="number" value="{{ row[1] }}" id="num-activities-{{ loop.index }}" /></td>  <!-- عدد الأنشطة -->
+                    <td><input type="number" value="{{ row[2] }}" id="avg-score-{{ loop.index }}" /></td>  <!-- متوسط الدرجات -->
+                    <td><input type="text" value="{{ row[3] }}" id="activity-types-{{ loop.index }}" /></td>  <!-- أنواع الأنشطة -->
+                    <td>
+                        <button onclick="editStudent({{ loop.index }})" class="btn-edit">Edit</button>
+                        <button onclick="removeStudent({{ loop.index }})" class="btn-remove">Remove</button>
+                        <button onclick="saveChanges({{ loop.index }})" class="btn-save">Save</button> <!-- زر حفظ التعديلات -->
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- الرسم البياني -->
+        <div class="chart-container">
+            <canvas id="attendanceChart"></canvas>
+        </div>
+
+        <!-- زر الرجوع -->
+        <div class="back-button">
+            <a href="/" class="btn back-btn">Back</a>
+        </div>
+    </div>
+
+    <script>
+        function addStudent() {
+            let studentName = document.getElementById("studentName").value;
+            if (studentName.trim() === "") {
+                alert("Please enter a student name!");
+                return;
+            }
+
+            let table = document.getElementById("studentTable");
+            let row = table.insertRow();
+            row.innerHTML = `
+                <td><input type="text" value="${studentName}" /></td>
+                <td><input type="number" value="0" /></td>
+                <td><input type="number" value="0" /></td>
+                <td><input type="text" value="-" /></td>
+                <td>
+                    <button onclick="editStudent(this)" class="btn-edit">Edit</button>
+                    <button onclick="removeStudent(this)" class="btn-remove">Remove</button>
+                    <button onclick="saveChanges(this)" class="btn-save">Save</button>
+                </td>
+            `;
+            document.getElementById("studentName").value = ""; // تفريغ الإدخال بعد الإضافة
+        }
+
+        function editStudent(button) {
+            let row = button.parentNode.parentNode;
+            let nameCell = row.cells[0];
+            let newName = prompt("Edit Student Name:", nameCell.innerText);
+            if (newName !== null && newName.trim() !== "") {
+                nameCell.innerText = newName;
+            }
+        }
+
+        function removeStudent(button) {
+            if (confirm("Are you sure you want to remove this student?")) {
+                let row = button.parentNode.parentNode;
+                row.parentNode.removeChild(row);
+            }
+        }
+
+        function saveChanges(index) {
+            let numActivities = document.getElementById("num-activities-" + index).value;
+            let avgScore = document.getElementById("avg-score-" + index).value;
+            let activityTypes = document.getElementById("activity-types-" + index).value;
+
+            // إرسال البيانات المعدلة إلى الخادم لحفظها في قاعدة البيانات
+            fetch('/save_report', {
+                method: 'POST',
+                body: JSON.stringify({
+                    student_name: document.getElementById("studentName-" + index).value,
+                    num_activities: numActivities,
+                    avg_score: avgScore,
+                    activity_types: activityTypes
+                }),
+                headers: { 'Content-Type': 'application/json' }
+            }).then(response => response.json())
+              .then(data => alert('Changes saved!'))
+              .catch(error => console.error('Error:', error));
+        }
+
+        // رسم بياني صغير للحضور
+        var ctx = document.getElementById('attendanceChart').getContext('2d');
+        var attendanceChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Student 1', 'Student 2', 'Student 3'], // بيانات وهمية
+                datasets: [{
+                    label: 'Attendance Percentage',
+                    data: [65, 35, 50],  // استبدلها بالبيانات الحقيقية
+                    backgroundColor: ['#36a2eb', '#ffcd56', '#ff5733']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    </script>
+</body>
+</html>
